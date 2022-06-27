@@ -1,0 +1,44 @@
+version: '3.9'
+
+services:
+
+  python_app:
+    build:
+      context: .
+      dockerfile: Dockerfile # указываем наш Dockerfile
+    depends_on:
+      - postgres_db # указываем DB
+    ports:
+      - 5000:5000 # указываем порт
+    expose:
+      - '5000'
+    networks:
+      - app-tier
+      - default
+    links:
+      - postgres_db
+
+  postgres_db:
+    # указываем параметры DB
+    image: postgres:14.4
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: numbers
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+    ports:
+      - 5433:5432
+    expose:
+      - 5433
+    networks:
+      - app-tier
+    volumes:
+      - ./postgres:/docker-entrypoint-initdb.d
+
+networks:
+  app-tier:
+    driver: bridge
+
+volumes:
+  postgres_db:
+    driver: local
